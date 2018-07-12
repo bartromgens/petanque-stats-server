@@ -16,10 +16,34 @@ class Team(models.Model):
     def __str__(self):
         return ' - '.join([player.user.username for player in self.players.all()])
 
+    @staticmethod
+    def create(players):
+        team = Team.objects.create()
+        team.players.set(players)
+        team.save()
+        return team
+
+    @staticmethod
+    def get_or_create_team(player_ids):
+        teams = Team.objects.filter(players__in=player_ids)
+        for player_id in player_ids:
+            teams = teams.filter(players=player_id)
+        if teams.exists():
+            return teams[0]
+        players = Player.objects.filter(id__in=player_ids)
+        return Team.create(players)
+
 
 class Game(models.Model):
     max_score = models.IntegerField(default=13, null=False, blank=False)
     teams = models.ManyToManyField(Team)
+
+    def __str__(self):
+        gameStr = '====GAME====\n'
+        gameStr += 'max score: ' + str(self.max_score) + '\n'
+        for score in self.team_scores:
+            gameStr += str(score) + '\n'
+        return gameStr
 
     @property
     def players(self):
