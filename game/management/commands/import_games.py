@@ -10,18 +10,18 @@ from game.models import Game, Team, ScoreTeam, Player
 
 class Command(BaseCommand):
     help = 'Import scores from a custom format'
-    players_filepath = 'game/data/players.json'
-    games_filepath = 'game/data/games.json'
+    players_filepath = 'data/players.json'
+    games_filepath = 'data/games.json'
 
     @transaction.atomic
     def handle(self, *args, **options):
-        print('BEGIN: Import scores')
-        self.create_admin()
-        self.create_users()
-        games = self.create_games()
+        print('BEGIN: import games')
+        Command.create_admin()
+        Command.create_users()
+        games = Command.create_games()
         for game in games:
             print(game)
-        print('END: Import scores')
+        print('END: import games')
 
     @staticmethod
     def create_admin():
@@ -42,12 +42,13 @@ class Command(BaseCommand):
                 password=uuid.uuid4().hex[:10]
             )
 
-    def create_games(self):
+    @staticmethod
+    def create_games():
         games = []
         with open(Command.games_filepath, 'r') as players_file:
             games_json = json.load(players_file)
         for game_data in games_json['games']:
-            games.append(self.create_game(game_data))
+            games.append(Command.create_game(game_data))
         return games
 
     @staticmethod
