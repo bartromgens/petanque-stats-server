@@ -1,9 +1,6 @@
 from django.contrib.auth.models import User
 
-from rest_framework import serializers, viewsets, views
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.decorators import action
+from rest_framework import serializers, viewsets
 
 from game.models import Player, ScoreTeam, Team, Game
 
@@ -77,28 +74,14 @@ class GameViewSet(viewsets.ModelViewSet):
         players_team_b = request.data['playersTeamB']
         score_a = request.data['scoreTeamA']
         score_b = request.data['scoreTeamB']
-        players_team_a_ids = GameViewSet.get_team_player_ids(players_team_a)
-        players_team_b_ids = GameViewSet.get_team_player_ids(players_team_b)
+        players_team_a_ids = [player["id"] for player in players_team_a]
+        players_team_b_ids = [player["id"] for player in players_team_b]
         team_a = Team.get_or_create_team(players_team_a_ids)
         team_b = Team.get_or_create_team(players_team_b_ids)
         teams = [team_a, team_b]
-        game = GameViewSet.create_game(max_score=max_score, teams=teams)
+        game = Game.create(max_score=max_score, teams=teams)
         ScoreTeam.objects.create(team=team_a, game=game, score=score_a)
         ScoreTeam.objects.create(team=team_b, game=game, score=score_b)
         print(game)
         self.kwargs['pk'] = game.id
         return self.retrieve(request)
-
-    @staticmethod
-    def get_team_player_ids(team_players):
-        team_player_ids = []
-        for player in team_players:
-            team_player_ids.append(player["id"])
-        return team_player_ids
-
-    @staticmethod
-    def create_game(max_score, teams):
-        game = Game.objects.create(max_score=max_score)
-        game.teams.set(teams)
-        game.save()
-        return game

@@ -1,12 +1,33 @@
 from django.db import models
+from django.db.models.signals import post_save
 from django.contrib.auth.models import User
+from django.dispatch import receiver
 
 
 class Player(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
-        return self.user.username
+        return self.name
+
+    @property
+    def name(self):
+        if self.user:
+            return self.user.username
+        return ''
+
+    @staticmethod
+    def get_by_name(name):
+        users = User.objects.filter(username=name)
+        if users.exists():
+            return Player.objects.get(user=users[0])
+        return None
+
+
+@receiver(post_save, sender=User, dispatch_uid="create_player")
+def create_player(sender, instance, created, **kwargs):
+    if created:
+        Player.objects.create(user=instance)
 
 
 class Team(models.Model):
@@ -28,7 +49,7 @@ class Team(models.Model):
         teams = Team.objects.filter(players__in=player_ids)
         for player_id in player_ids:
             teams = teams.filter(players=player_id)
-        if teams.exists():
+        if teams.exists() and teams.count() == len(player_ids):
             return teams[0]
         players = Player.objects.filter(id__in=player_ids)
         return Team.create(players)
@@ -39,11 +60,18 @@ class Game(models.Model):
     teams = models.ManyToManyField(Team)
 
     def __str__(self):
-        gameStr = '====GAME====\n'
-        gameStr += 'max score: ' + str(self.max_score) + '\n'
+        game_str = '====GAME====\n'
+        game_str += 'max score: ' + str(self.max_score) + '\n'
         for score in self.team_scores:
-            gameStr += str(score) + '\n'
-        return gameStr
+            game_str += str(score) + '\n'
+        return game_str
+
+    @staticmethod
+    def create(max_score, teams):
+        game = Game.objects.create(max_score=max_score)
+        game.teams.set(teams)
+        game.save()
+        return game
 
     @property
     def players(self):

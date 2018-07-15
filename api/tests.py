@@ -1,4 +1,5 @@
 import json
+import uuid
 
 from django.contrib.auth.models import User
 from django.test import TestCase
@@ -34,6 +35,20 @@ class TestAdminPages(TestCaseAdminLogin):
     def test_admin_homepage(self):
         response = self.client.get('/admin/')
         self.assertEqual(response.status_code, 200)
+
+
+class TestPlayer(TestCase):
+
+    def test_create_player_on_user_creation(self):
+        username = 'testuser'
+        user = User.objects.create_user(
+            username=username,
+            email=username + '@test.com',
+            password=uuid.uuid4().hex[:10]
+        )
+        players = Player.objects.filter(user=user)
+        self.assertTrue(players.exists())
+        self.assertEqual(1, players.count())
 
 
 class TestGame(TestCase):
@@ -75,8 +90,7 @@ class TestGame(TestCase):
             'scoreTeamB': 13
         }
         response = self.client.post(url, data=json.dumps(data), content_type='application/json')
-        print(response.status_code)
-        print(response.data)
+        self.assertEqual(response.status_code, 200)
 
     # def test_create_game(self):
     #     url = '/v1/create_game/'
