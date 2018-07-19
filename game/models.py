@@ -80,6 +80,12 @@ class Game(models.Model):
             players += team.players.all()
         return players
 
+    def team_score(self, team):
+        for score in self.team_scores:
+            if score.team.id == team.id:
+                return score.score
+        return None
+
     @property
     def teams_list(self):
         teams_list = []

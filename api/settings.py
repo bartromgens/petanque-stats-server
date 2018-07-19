@@ -11,6 +11,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 INSTALLED_APPS = [
     'api',
     'game',
+    'stats',
     'rest_framework',
     'registration',
     'dbbackup',
