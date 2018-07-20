@@ -57,10 +57,9 @@ class TestGame(TestCase):
     @classmethod
     def setUpTestData(cls):
         super().setUpTestData()
-        players = []
         for i in range(4):
-            user = User.objects.create_user(username='player ' + str(i), email='player' + str(i) + '@test.com', password=cls.password)
-            players.append(Player.objects.create(pk=i, user=user))
+            User.objects.create_user(username='player ' + str(i), email='player' + str(i) + '@test.com', password=cls.password)
+        players = Player.objects.all()
         players_team_a = [players[0], players[1]]
         players_team_b = [players[2], players[3]]
         team_a = Team.create(players_team_a)
