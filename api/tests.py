@@ -56,6 +56,7 @@ class TestGame(TestCase):
 
     @classmethod
     def setUpTestData(cls):
+        super().setUpTestData()
         players = []
         for i in range(4):
             user = User.objects.create_user(username='player ' + str(i), email='player' + str(i) + '@test.com', password=cls.password)
