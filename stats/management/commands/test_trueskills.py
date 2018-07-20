@@ -10,5 +10,7 @@ class Command(BaseCommand):
     @transaction.atomic
     def handle(self, *args, **options):
         print('BEGIN')
-        ranking.calculate_trueskill_rating_history()
+        ranking.plot_rating_history()
+        # ranking.calculate_trueskill_team_rating_history()
+        # ranking.calculate_team_win_probability()
         print('END')
