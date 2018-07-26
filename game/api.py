@@ -1,8 +1,10 @@
 from django.contrib.auth.models import User
+from django.http import JsonResponse
 
 from rest_framework import serializers, viewsets
 
 from game.models import Player, ScoreTeam, Team, Game
+from stats import ranking
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
@@ -85,3 +87,23 @@ class GameViewSet(viewsets.ModelViewSet):
         print(game)
         self.kwargs['pk'] = game.id
         return self.retrieve(request)
+
+
+def player_true_skills_ratings_history(request):
+    players = Player.objects.exclude(user__username='admin')
+    ratings = ranking.TrueSkillPlayerRatings(players=players, games=Game.objects.all())
+    rating_history, player_ratings = ratings.calculate_rating_history()
+    ratings_simple = []
+    for ratings in rating_history:
+        for player, rating in ratings.items():
+            ratings_simple.append({
+                'player': player,
+                'rank': calculate_rank(mu=rating.mu, sigma=rating.sigma),
+                'skill': rating.mu,
+                'sigma': rating.sigma
+            })
+    return JsonResponse({'player_rating_history': ratings_simple})
+
+
+def calculate_rank(mu, sigma):
+    return mu - 3 * sigma

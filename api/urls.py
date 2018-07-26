@@ -16,6 +16,7 @@ router.register(r'users', api.UserViewSet)
 
 urlpatterns = [
     url(r'^v1/', include(router.urls)),
+    url(r'^v1/players/trueskill/history/', api.player_true_skills_ratings_history),
     url(r'^admin/', admin.site.urls),
 ]
 

@@ -13,6 +13,12 @@ def plot_rating_history():
 
 
 class TrueSkillPlayerRatings(object):
+    """
+    Calculates the TrueSkill player rank based on a list of games of N vs N.
+    NOTE: The result are a mu and sigma (variance per player).
+    The player rank is not calculated here but follows from the mu and sigma:
+    R = mu - 3 * sigma, source: https://en.wikipedia.org/wiki/TrueSkill
+    """
 
     def __init__(self, players, games):
         self.players = players
@@ -35,7 +41,7 @@ class TrueSkillPlayerRatings(object):
         return player_ratings
 
     def calculate_rating_history(self):
-        self.ratings_history = []
+        self.ratings_history = [self.create_initial_ratings(self.players)]
         for game in self.games:
             current_rating = self.update_rating_for_game(game)
             self.ratings_history.append(current_rating)
