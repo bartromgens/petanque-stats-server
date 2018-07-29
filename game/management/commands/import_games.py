@@ -16,7 +16,7 @@ class Command(BaseCommand):
     @transaction.atomic
     def handle(self, *args, **options):
         print('BEGIN: import games')
-        Command.create_admin()
+        # Command.create_admin()
         Command.create_users()
         games = Command.create_games()
         for game in games:
